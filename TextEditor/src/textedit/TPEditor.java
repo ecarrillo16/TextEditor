@@ -74,6 +74,14 @@ public class TPEditor {    //clase publica TPEditor
     private final UndoManager undoManager;            //instancia de UndoManager (administrador de edición)
  
     public static void main(String[] args) {    //punto de entrada del programa
+    	//construye la GUI en el EDT (Event Dispatch Thread)
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+     
+            @Override
+            public void run() {
+                new TPEditor().jFrame.setVisible(true);    //hace visible la GUI creada por la clase TPEditor
+            }
+        });
     }
  
     public TPEditor() {    //constructor de la clase TPEditor
