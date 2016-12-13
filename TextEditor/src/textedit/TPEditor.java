@@ -1,4 +1,4 @@
-package textedit;
+package textedit;		//se define el paquete donde debe estar este archivo
 
 import java.awt.BorderLayout;    //importamos todo lo que se utilizará
 import java.awt.Component;
@@ -41,6 +41,10 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.undo.UndoManager;
  
+/**
+ * @author ecarrillo
+ *
+ */
 public class TPEditor {    //clase publica TPEditor
  
     private JFrame jFrame;            //instancia de JFrame (ventana principal)
