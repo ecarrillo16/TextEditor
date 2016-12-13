@@ -28,65 +28,354 @@ public class ActionPerformer {    //clase publica ActionPerformer
     private String lastSearch = "";     //la última búsqueda de texto realizada, por defecto no contiene nada
  
     public ActionPerformer(TPEditor tpEditor) {    //constructor de la clase ActionPerformer
+    	this.tpEditor = tpEditor;    //guarda la instancia de la clase TPEditor
     }
  
     public void actionNew() {    //opción seleccionada: "Nuevo"
+    	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
+            //se le ofrece al usuario guardar los cambios
+            int option = JOptionPane.showConfirmDialog(tpEditor.getJFrame(), "¿Desea guardar los cambios?");
+     
+            switch (option) {
+                case JOptionPane.YES_OPTION:       //si elige que si
+                    actionSaveFile();              //se guarda el archivo
+                    break;
+                case JOptionPane.CANCEL_OPTION:    //si elige cancelar
+                    return;                        //se cancela esta operación
+                //en otro caso se continúa con la operación y no se guarda el documento actual
+            }
+        }
+     
+        tpEditor.getJFrame().setTitle("TextPad Demo - Sin Título");    //nuevo título de la ventana
+     
+        //limpia el contenido del area de edición
+        tpEditor.getJTextArea().setText("");
+        //limpia el contenido de las etiquetas en la barra de estado
+        tpEditor.getJLabelFilePath().setText("");
+        tpEditor.getJLabelFileSize().setText("");
+     
+        tpEditor.getUndoManager().die();    //limpia el buffer del administrador de edición
+        tpEditor.updateControls();          //actualiza el estado de las opciones "Deshacer" y "Rehacer"
+     
+        //el archivo asociado al documento actual se establece como null
+        tpEditor.setCurrentFile(null);
+        //marca el estado del documento como no modificado
+        tpEditor.setDocumentChanged(false);
     }
  
     public void actionOpen() {    //opción seleccionada: "Abrir"
+    	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
+            //le ofrece al usuario guardar los cambios
+            int option = JOptionPane.showConfirmDialog(tpEditor.getJFrame(), "¿Desea guardar los cambios?");
+     
+            switch (option) {
+                case JOptionPane.YES_OPTION:     //si elige que si
+                    actionSaveFile();            //se guarda el archivo
+                    break;
+                case JOptionPane.CANCEL_OPTION:  //si elige cancelar
+                    return;                      //se cancela esta operación
+                //en otro caso se continúa con la operación y no se guarda el documento actual
+            }
+        }
+     
+        JFileChooser fc = getJFileChooser();    //obtiene un JFileChooser
+     
+        //se presenta un dialogo modal para que el usuario seleccione un archivo
+        int state = fc.showOpenDialog(tpEditor.getJFrame());
+     
+        if (state == JFileChooser.APPROVE_OPTION) {    //si elige abrir el archivo
+            File f = fc.getSelectedFile();    //obtiene el archivo seleccionado
+     
+            try {
+                //abre un flujo de datos desde el archivo seleccionado
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                tpEditor.getJTextArea().read(br, null);    //lee desde el flujo de datos hacia el área de edición
+                br.close();    //cierra el flujo de datos
+     
+                //asigna el manejador de eventos para registrar los cambios en el nuevo documento actual
+                tpEditor.getJTextArea().getDocument().addUndoableEditListener(tpEditor.getEventHandler());
+     
+                tpEditor.getUndoManager().die();    //limpia el buffer del administrador de edición
+                tpEditor.updateControls();          //actualiza el estado de las opciones "Deshacer" y "Rehacer"
+     
+                //nuevo título de la ventana con el nombre del archivo abierto
+                tpEditor.getJFrame().setTitle("TextPad Demo - " + f.getName());
+     
+                //muestra la ubicación del archivo abierto
+                tpEditor.getJLabelFilePath().setText(shortPathName(f.getAbsolutePath()));
+                //muestra el tamaño del archivo abierto
+                tpEditor.getJLabelFileSize().setText(roundFileSize(f.length()));
+     
+                //establece el archivo abierto como el archivo actual
+                tpEditor.setCurrentFile(f);
+                //marca el estado del documento como no modificado
+                tpEditor.setDocumentChanged(false);
+            } catch (IOException ex) {    //en caso de que ocurra una excepción
+                //presenta un dialogo modal con alguna información de la excepción
+                JOptionPane.showMessageDialog(tpEditor.getJFrame(),
+                                              ex.getMessage(),
+                                              ex.toString(),
+                                              JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
  
     public void actionSave() {    //opción seleccionada: "Guardar"
+    	if (tpEditor.getCurrentFile() == null) {    //si no hay un archivo asociado al documento actual
+            actionSaveAs();    //invoca el método actionSaveAs()
+        } else if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
+            try {
+                //abre un flujo de datos hacia el archivo asociado al documento actual
+                BufferedWriter bw = new BufferedWriter(new FileWriter(tpEditor.getCurrentFile()));
+                //escribe desde el flujo de datos hacia el archivo
+                tpEditor.getJTextArea().write(bw);
+                bw.close();    //cierra el flujo
+     
+                //marca el estado del documento como no modificado
+                tpEditor.setDocumentChanged(false);
+            } catch (IOException ex) {    //en caso de que ocurra una excepción
+                //presenta un dialogo modal con alguna información de la excepción
+                JOptionPane.showMessageDialog(tpEditor.getJFrame(),
+                                              ex.getMessage(),
+                                              ex.toString(),
+                                              JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
  
     public void actionSaveAs() {    //opción seleccionada: "Guardar como"
+    	JFileChooser fc = getJFileChooser();    //se obtiene un JFileChooser
+    	 
+        //presenta un dialogo modal para que el usuario seleccione un archivo
+        int state = fc.showSaveDialog(tpEditor.getJFrame());
+        if (state == JFileChooser.APPROVE_OPTION) {    //si elige guardar en el archivo
+            File f = fc.getSelectedFile();    //se obtiene el archivo seleccionado
+     
+            try {
+                //abre un flujo de datos hacia el archivo asociado seleccionado
+                BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+                //escribe desde el flujo de datos hacia el archivo
+                tpEditor.getJTextArea().write(bw);
+                bw.close();    //cierra el flujo
+     
+                //nuevo título de la ventana con el nombre del archivo guardado
+                tpEditor.getJFrame().setTitle("TextPad Demo - " + f.getName());
+     
+                //muestra la ubicación del archivo guardado
+                tpEditor.getJLabelFilePath().setText(shortPathName(f.getAbsolutePath()));
+                //muestra el tamaño del archivo guardado
+                tpEditor.getJLabelFileSize().setText(roundFileSize(f.length()));
+     
+                //establece el archivo guardado como el archivo actual
+                tpEditor.setCurrentFile(f);
+                //marca el estado del documento como no modificado
+                tpEditor.setDocumentChanged(false);
+            } catch (IOException ex) {    //en caso de que ocurra una excepción
+                //presenta un dialogo modal con alguna información de la excepción
+                JOptionPane.showMessageDialog(tpEditor.getJFrame(),
+                                              ex.getMessage(),
+                                              ex.toString(),
+                                              JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
  
     public void actionPrint() {    //opción seleccionada: "Imprimir"
+    	boolean result = false;    //resultado de la impresión, por defecto es false
+    	 
+        //si el documento actual no esta vacío
+        if (tpEditor.getJTextArea().getText().trim().equals("") == false) {
+            //invoca nuestra la clase PrintAction para presentar el dialogo de impresión
+            result = PrintAction.print(tpEditor.getJTextArea(), tpEditor.getJFrame());
+        }
     }
  
     public void actionExit() {    //opción seleccionada: "Salir"
+    	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
+            //se le ofrece al usuario guardar los cambios
+            int option = JOptionPane.showConfirmDialog(tpEditor.getJFrame(), "¿Desea guardar los cambios?");
+     
+            switch (option) {
+                case JOptionPane.YES_OPTION:     //si elige que si
+                    actionSave();                //se guarda el archivo
+                    break;
+                case JOptionPane.CANCEL_OPTION:  //si elige cancelar
+                    return;                      //se cancela esta operación
+                //en otro caso se continúa con la operación y no se guarda el documento actual
+            }
+        }
+     
+        System.exit(0);    //se finaliza el programa con el código 0 (sin error)
     }
  
     public void actionUndo() {    //opción seleccionada: "Deshacer"
+    	try {
+            //deshace el último cambio realizado sobre el documento en el área de edición
+            tpEditor.getUndoManager().undo();
+        } catch (CannotUndoException ex) {    //en caso de que ocurra una excepción
+            System.err.println(ex);
+        }
+     
+        //actualiza el estado de las opciones "Deshacer" y "Rehacer"
+        tpEditor.updateControls();
     }
  
     public void actionRedo() {    //opción seleccionada: "Rehacer"
+    	try {
+            //rehace el último cambio realizado sobre el documento en el área de edición
+            tpEditor.getUndoManager().redo();
+        } catch (CannotRedoException ex) {    //en caso de que ocurra una excepción
+            System.err.println(ex);
+        }
+     
+        //actualiza el estado de las opciones "Deshacer" y "Rehacer"
+        tpEditor.updateControls();
     }
  
     public void actionSearch() {    //opción seleccionada: "Buscar"
+    	//solicita al usuario que introduzca el texto a buscar
+        String text = JOptionPane.showInputDialog(
+                tpEditor.getJFrame(),
+                "Texto:",
+                "TextPad Demo - Buscar",
+                JOptionPane.QUESTION_MESSAGE);
+     
+        if (text != null) {    //si se introdujo texto (puede ser una cadena vacía)
+            String textAreaContent = tpEditor.getJTextArea().getText();    //obtiene todo el contenido del área de edición
+            int pos = textAreaContent.indexOf(text);    //obtiene la posición de la primera ocurrencia del texto
+     
+            if (pos > -1) {    //si la posición es mayor a -1 significa que la búsqueda fue positiva
+                //selecciona el texto en el área de edición para resaltarlo
+                tpEditor.getJTextArea().select(pos, pos + text.length());
+            }
+     
+            //establece el texto buscado como el texto de la última búsqueda realizada
+            lastSearch = text;
+        }
     }
  
     public void actionSearchNext() {    //opción seleccionada: "Buscar siguiente"
+    	if (lastSearch.isEmpty() == false) {    //si la última búsqueda contiene texto
+            String textAreaContent = tpEditor.getJTextArea().getText();    //se obtiene todo el contenido del área de edición
+            int pos = tpEditor.getJTextArea().getCaretPosition();    //se obtiene la posición del cursor sobre el área de edición
+            //buscando a partir desde la posición del cursor, se obtiene la posición de la primera ocurrencia del texto
+            pos = textAreaContent.indexOf(lastSearch, pos);
+     
+            if (pos > -1) {    //si la posición es mayor a -1 significa que la búsqueda fue positiva
+                //selecciona el texto en el área de edición para resaltarlo
+                tpEditor.getJTextArea().select(pos, pos + lastSearch.length());
+            }
+        } else {    //si la última búsqueda no contiene nada
+            actionSearch();    //invoca el método actionSearch()
+        }
     }
  
     public void actionGoToLine() {    //opción seleccionada: "Ir a la línea..."
+    	//solicita al usuario que introduzca el número de línea
+        String line = JOptionPane.showInputDialog(
+                tpEditor.getJFrame(),
+                "Número:",
+                "TextPad Demo - Ir a la línea...",
+                JOptionPane.QUESTION_MESSAGE);
+     
+        if (line != null && line.length() > 0) {    //si se introdujo un dato
+            try {
+                int pos = Integer.parseInt(line);    //el dato introducido se convierte en entero
+     
+                //si el número de línea esta dentro de los límites del área de texto
+                if (pos >= 0 && pos <= tpEditor.getJTextArea().getLineCount()) {
+                    //posiciona el cursor en el inicio de la línea
+                    tpEditor.getJTextArea().setCaretPosition(tpEditor.getJTextArea().getLineStartOffset(pos));
+                }
+            } catch (NumberFormatException ex) {    //en caso de que ocurran excepciones
+                System.err.println(ex);
+            } catch (BadLocationException ex) {
+                System.err.println(ex);
+            }
+        }
     }
  
     public void actionSelectFont() {   //opción seleccionada: "Fuente de letra"
+    	//presenta el dialogo de selección de fuentes
+        Font font = JFontChooser.showDialog(tpEditor.getJFrame(),
+                                            "TextPad Demo - Fuente de letra:",
+                                            null);
+        if (font != null) {    //si un fuente fue seleccionado
+            //se establece como fuente del área de edición
+            tpEditor.getJTextArea().setFont(font);
+        }
     }
  
     public void actionSelectFontColor() {    //opción seleccionada: "Color de letra"
+    	//presenta el dialogo de selección de colores
+        Color color = JColorChooser.showDialog(tpEditor.getJFrame(),
+                                               "TextPad Demo - Color de letra:",
+                                               tpEditor.getJTextArea().getForeground());
+        if (color != null) {    //si un color fue seleccionado
+            //se establece como color del fuente y cursor
+            tpEditor.getJTextArea().setForeground(color);
+            tpEditor.getJTextArea().setCaretColor(color);
+        }
     }
  
     public void actionSelectBackgroundColor() {    //opción seleccionada: "Color de fondo"
+    	//presenta el dialogo de selección de colores
+        Color color = JColorChooser.showDialog(tpEditor.getJFrame(),
+                                               "TextPad Demo - Color de fondo:",
+                                               tpEditor.getJTextArea().getForeground());
+        if (color != null) {    //si un color fue seleccionado
+            //se establece como color de fondo
+            tpEditor.getJTextArea().setBackground(color);
+        }
     }
  
     private static JFileChooser getJFileChooser() {    //retorna un JFileChooser
+    	JFileChooser fc = new JFileChooser();                     //construye un JFileChooser
+        fc.setDialogTitle("TextPad Demo - Elige un archivo:");    //se le establece un título
+        fc.setMultiSelectionEnabled(false);                       //desactiva la multi-selección
+        fc.setFileFilter(textFileFilter);                         //aplica un filtro de extensiones
+        return fc;    //retorna el JFileChooser
     }
  
     //clase anónima interna que define un filtro de extensiones
     private static FileFilter textFileFilter = new FileFilter() {
-        public boolean accept(File f) {
+    	public boolean accept(File f) {
+            //acepta directorios y archivos de extensión .txt
+            return f.isDirectory() || f.getName().toLowerCase().endsWith("txt");
         }
- 
+     
         public String getDescription() {
+            //la descripción del tipo de archivo aceptado
+            return "Text Files";
         }
     };
  
     private static String shortPathName(String longpath) {    //comprime una ruta de archivo muy larga
+    	//construye un arreglo de cadenas, donde cada una es un nombre de directorio
+        String[] tokens = longPath.split(Pattern.quote(File.separator));
+     
+        //construye un StringBuilder donde se añadira el resultado
+        StringBuilder shortpath = new StringBuilder();
+     
+        //itera sobre el arreglo de cadenas
+        for (int i = 0 ; i < tokens.length ; i++) {
+            if (i == tokens.length - 1) {             //si la cadena actual es la última, es el nombre del archivo
+                shortpath.append(tokens[i]);    //se añade al resultado sin separador
+                break;                          //se termina el bucle
+            } else if (tokens[i].length() >= 10) {    //si la cadena actual tiene 10 o más caracteres
+                //se toman los primeros 3 caracteres y se añade al resultado con un separador
+                shortpath.append(tokens[i].substring(0, 3)).append("...").append(File.separator);
+            } else {                                  //si la cadena actual tiene menos de 10 caracteres
+                //se añade al resultado con un separador
+                shortpath.append(tokens[i]).append(File.separator);
+            }
+        }
+     
+        return shortpath.toString();    //retorna la cadena resultante
     }
  
     private static String roundFileSize(long length) {    //retorna el tamaño de un archivo redondeado
+    	//retorna el tamaño del archivo redondeado
+        return (length < 1024) ? length + " bytes" : (length / 1024) + " Kbytes";
     }
 }
