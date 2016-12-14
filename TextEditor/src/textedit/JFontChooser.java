@@ -33,8 +33,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Position;
 
 /**
+ * Clase que extiende javax.swing.JComponent para crear un componente Swing donde el usuario
+ * pueda seleccionar un fuente.
+ * 
  * @author ecarrillo
- *
  */
 
 public class JFontChooser extends JComponent {    //clase publica que extiende JComponent
@@ -42,11 +44,25 @@ public class JFontChooser extends JComponent {    //clase publica que extiende J
     private final Font initialFont;    //fuente inicial
     private Font font;                 //fuente seleccionado por el usuario
  
+    /**
+     * Constructor de esta clase.
+     * 
+     * @param initialFont el fuente inicial
+     */
     public JFontChooser(Font initialFont) {    //constructor de la clase JFontChooser
     	this.initialFont = initialFont;    //guarda el fuente inicial
     }
  
-    //método estático conveniente para inicializar la clase JFontChooser
+    /**
+     * Método estático que construye e inicializa la clase JFontChooser para presentar al 
+     * usuario el dialogo de selección de fuente.
+     * 
+     * @param owner la ventana padre
+     * @param title el título de la ventana
+     * @param initialFont el fuente inicial
+     * 
+     * @return el fuente seleccionado
+     */
     public static Font showDialog(Frame owner, String title, Font initialFont) {
     	JFontChooser fontChooser = new JFontChooser(initialFont);    //construye una instancia de JFontChooser
     	 
@@ -56,15 +72,30 @@ public class JFontChooser extends JComponent {    //clase publica que extiende J
      
         return fontChooser.getSelectedFont();    //retorna el fuente seleccionado
     }
- 
+
+    /**
+     * Retorna el fuente inicial.
+     * 
+     * @return el fuente inicial
+     */
     public Font getInitialFont() {    //retorna el fuente inicial
     	return initialFont;
     }
  
+    /**
+     * Retorna el fuente seleccionado.
+     * 
+     * @return el fuente seleccionado
+     */
     public Font getSelectedFont() {    //retorna el fuente seleccionado
     	return font;
     }
  
+    /**
+     * Establece el fuente seleccionado.
+     * 
+     * @param font el fuente seleccionado
+     */
     public void setSelectedFont(Font font) {    //establece el fuente seleccionado
     	this.font = font;
     }
@@ -91,7 +122,16 @@ class FontChooserDialog extends JDialog {    //clase que extiende JDialog
         "8", "9", "10", "11", "12", "13", "14", "16", "18", "20", "24", "28", "32", "48", "72"
     };
  
-    //constructor de la clase FontChooserDialog, construye un dialogo modal
+    /**
+     * Constructor de la clase.
+     * 
+     * Construye una ventana modal de dialogo sobre una ventana padre. El usuario 
+     * puede seleccionar un fuente.
+     * 
+     * @param owner la ventana padre
+     * @param title
+     * @param jFontChooser 
+     */
     public FontChooserDialog(Frame owner, String title, final JFontChooser jFontChooser) {
     	/** invoca el constructor de la superclase para establecer la ventana padre, el título
         de la ventana, y que será una ventana modal */
@@ -282,9 +322,18 @@ class FontChooserDialog extends JDialog {    //clase que extiende JDialog
         setLocationRelativeTo(owner);     //la ventana se centra sobre el editor de texto
     }
  
-    //clase interna que extiende KeyAdapter e implementa ListSelectionListener y Comparator
-    class EventHandler extends KeyAdapter implements Comparator,
+    /**
+     * Clase interna que extiende e implementa las clases e interfaces necesarias para 
+     * atender y manejar los eventos sobre la ventana de selección de fuente.
+     */
+    class EventHandler extends KeyAdapter implements Comparator<String>,
                                                      ListSelectionListener {
+    	
+    	/**
+         * Atiende y maneja los eventos de teclado cuando se libera una tecla.
+         * 
+         * @param ke evento de tecla
+         */
         @Override
         public void keyReleased(KeyEvent ke) {    //herencia de la clase KeyAdapter
         	//obtiene el origen del evento, y lo convierte en un campo de texto
@@ -341,12 +390,24 @@ class FontChooserDialog extends JDialog {    //clase que extiende JDialog
             textExample.setFont(getSelectedFont());
         }
  
+        /**
+         * Comparación lexicográfica de dos cadenas de texto ignorando mayúsculas.
+         * 
+         * @param string1 una cadena de texto
+         * @param string2 otra cadena de texto
+         * @return true si son dos cadenas iguales, false en caso contrario 
+         */
         @Override
         public int compare(String string1, String string2) {    //implemento de la interface Comparator
         	//compara dos cadenas de texto ignorando mayúsculas
             return string1.compareToIgnoreCase(string2);
         }
  
+        /**
+         * Atiende y maneja los eventos de selección en las listas de la ventana.
+         * 
+         * @param lse evento de selección en una lista
+         */
         @Override
         public void valueChanged(ListSelectionEvent lse) {    //implemento de la interface ListSelectionListener
         	//averigua en que lista se ah ejecutado el evento
@@ -366,6 +427,12 @@ class FontChooserDialog extends JDialog {    //clase que extiende JDialog
         }
     }
  
+    /**
+     * Retorna el fuente seleccionado por el usuario. Es el producto resultante de la elección de 
+     * un tipo, un estilo y un tamaño
+     * 
+     * @return el fuente seleccionado.
+     */
     public Font getSelectedFont() {    //retorna el fuente seleccionado
     	try {
             //retorna el fuente seleccionado en el dialogo

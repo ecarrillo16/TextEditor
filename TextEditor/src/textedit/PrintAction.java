@@ -27,8 +27,10 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 /**
+ * Clase que implementa la interface java.awt.print.Printable para imprimir el documento
+ * presente en el área de edición.
+ * 
  * @author ecarrillo
- *
  */
 
 public class PrintAction implements Printable {    //clase publica que implementa la interface Printable
@@ -40,17 +42,35 @@ public class PrintAction implements Printable {    //clase publica que implement
     private int currentPage = -1;         //página actual impresa, por defecto inicilizada en -1
     private boolean result = false;       //resultado de la impresión, por defecto es negativo
  
+    /**
+     * Constructor de la clase.
+     * 
+     * @param jComponent componente cuyo contenido se imprimirá
+     */
     public PrintAction(JComponent jComponent) {    //constructor de la clase PrintAction
     	this.jTextArea = (JTextArea) jComponent;    //guarda la instancia del área de edición
     }
  
-    //método estático conveniente para inicializar la clase PrintAction
+    /**
+     * Método estático que construye e inicializa la clase PrintAction para imprimir
+     * el documento presente en el área de edición.
+     * 
+     * @param jComponent componente cuyo contenido se imprimirá
+     * @param owner la ventana padre
+     * @return true si la impresión fue exitosa, false en caso contrario
+     */
     public static boolean print(JComponent jComponent, Frame owner) {
     	PrintAction pa = new PrintAction(jComponent);   //construye una instancia de PrintAction
         return pa.printDialog(owner);                   //inicia la impresión y retorna un valor booleano
     }
  
-    //presenta el dialogo de impresión e inicia la impresión del documento
+    /**
+     * Le permite al usuario configurar algunos aspectos de la impresión antes de comenzar. Durante
+     * la impresión muestra una ventana de dialogo con información de la misma.
+     * 
+     * @param owner la ventana padre
+     * @return true si la impresión fue exitosa, false en caso contrario
+     */
     public boolean printDialog(Frame owner) {
     	//construye un trabajo de impresión
         final PrinterJob pj = PrinterJob.getPrinterJob();
@@ -87,6 +107,14 @@ public class PrintAction implements Printable {    //clase publica que implement
         return PrintAction.this.result;    //retorna el resultado de la impresión
     }
  
+    /**
+     * Se renderiza cada página solicitada por el sistema de impresión.
+     * 
+     * @param g objeto de gráficos
+     * @param pf el formato de la página
+     * @param pageIndex el índice de la página a imprimir
+     * @return PAGE_EXISTS si la página se tiene que imprimir, NO_SUCH_PAGE si la página no es valida
+     */
     @Override
     public int print(Graphics g, PageFormat pf, int pageIndex) {    //implemento de la interface Printable
     	Graphics2D g2d = (Graphics2D) g;                      //conversión de gráficos simples a gráficos 2D
@@ -134,6 +162,11 @@ public class PrintAction implements Printable {    //clase publica que implement
         }
     }
  
+    /**
+     * Actualiza la información en el dialogo de estado de la impresión.
+     * 
+     * @param pageIndex índice de la página impresa
+     */
     private void updateStatus(int pageIndex) {    //actualiza el estado de la impresión en el dialogo de estado
     	if (pageIndex != currentPage) {
             currentPage++;    //incrementa la página actual    
@@ -150,11 +183,22 @@ public class PrintAction implements Printable {    //clase publica que implement
         }
     }
  
-    //clase que extiende JDialog, construye un dialogo modal
+    /**
+     * Clase interna que extiende javax.swing.JDialog para presentar una ventana modal de dialogo
+     * que muestra el estado de la impresión y un botón para cancelar la operación.
+     */
     private class PrintingMessageBox extends JDialog {
  
         private JLabel lbStatusMsg;    //etiqueta que muestra el estado de impresión
  
+        /**
+         * Constructor de esta clase.
+         * 
+         * Construye una ventana modal de dialogo sobre una ventana padre.
+         * 
+         * @param owner la ventana padre
+         * @param pj trabajo de impresión
+         */
         public PrintingMessageBox(Frame owner, final PrinterJob pj) {    //constructor de la clase PrintingMessageBox
         	/** invoca el constructor de la superclase para establecer la ventana padre, el título
             de la ventana, y que será una ventana modal */
@@ -199,6 +243,11 @@ public class PrintAction implements Printable {    //clase publica que implement
             setLocationRelativeTo(owner);    //centra la ventana sobre el editor de texto
         }
  
+        /**
+         * Establece el texto de estado que se muestra en el dialogo.
+         * 
+         * @param statusMsg texto de estado
+         */
         public void setStatusMsg(String statusMsg){    //establece el texto de la etiqueta lbStatusMsg
         	lbStatusMsg.setText(statusMsg);    //establece el texto de la etiqueta lbStatusMsg
         }

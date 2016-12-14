@@ -42,9 +42,11 @@ import javax.swing.text.BadLocationException;
 import javax.swing.undo.UndoManager;
  
 /**
+ * Clase principal donde se construye la GUI del editor.
+ * 
  * @author ecarrillo
- *
  */
+
 public class TPEditor {    //clase publica TPEditor
  
     private JFrame jFrame;            //instancia de JFrame (ventana principal)
@@ -76,7 +78,14 @@ public class TPEditor {    //clase publica TPEditor
     private final EventHandler eventHandler;          //instancia de EventHandler (la clase que maneja eventos)
     private final ActionPerformer actionPerformer;    //instancia de ActionPerformer (la clase que ejecuta acciones)
     private final UndoManager undoManager;            //instancia de UndoManager (administrador de edición)
- 
+    
+    /**
+     * Punto de entrada del programa.
+     *
+     * Instanciamos esta clase para construir la GUI y hacerla visible.
+     *
+     * @param args argumentos de la línea de comandos.
+     */
     public static void main(String[] args) {    //punto de entrada del programa
     	//construye la GUI en el EDT (Event Dispatch Thread)
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -87,7 +96,12 @@ public class TPEditor {    //clase publica TPEditor
             }
         });
     }
- 
+    
+    /**
+     * Constructor de la clase.
+     *
+     * Se construye la GUI del editor, y se instancian clases importantes.
+     */
     public TPEditor() {    //constructor de la clase TPEditor
     	try {    //LookAndFeel nativo
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -132,7 +146,10 @@ public class TPEditor {    //clase publica TPEditor
         //centra el JFrame en pantalla
         jFrame.setLocationRelativeTo(null);
     }
- 
+    
+    /**
+     * Construye la barra de menú.
+     */
     private void buildMenuBar() {    //construye la barra de menú
     	jMenuBar = new JMenuBar();    //construye un JMenuBar
     	 
@@ -301,6 +318,9 @@ public class TPEditor {    //clase publica TPEditor
         }
     }
  
+    /**
+     * Construye la barra de herramientas.
+     */
     private void buildToolBar() {    //construye la barra de herramientas
     	jToolBar = new JToolBar();       //construye un JToolBar
         jToolBar.setFloatable(false);    //se configura por defecto como barra fija
@@ -387,6 +407,9 @@ public class TPEditor {    //clase publica TPEditor
         }
     }
  
+    /**
+     * Construye el área de edición.
+     */
     private void buildTextArea() {    //construye el área de edición
     	jTextArea = new JTextArea();    //construye un JTextArea
     	 
@@ -408,6 +431,9 @@ public class TPEditor {    //clase publica TPEditor
         jTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK), "none");    //remueve CTRL + V ("Pegar")
     }
  
+    /**
+     * Construye la barra de estado.
+     */
     private void buildStatusBar() {    //construye la barra de estado
     	statusBar = new JPanel();    //construye un JPanel
         //se configura con un BoxLayout
@@ -434,6 +460,9 @@ public class TPEditor {    //clase publica TPEditor
         statusBar.add(sbCaretPos);
     }
  
+    /**
+     * Construye el menú emergente.
+     */
     private void buildPopupMenu() {    //construye el menú emergente
     	jPopupMenu = new JPopupMenu();    //se construye un JPopupMenu
     	 
@@ -491,14 +520,22 @@ public class TPEditor {    //clase publica TPEditor
             }
         }
     }
- 
-    private void showPopupMenu(MouseEvent e) {    //despliega el menú emergente
+    
+    /**
+     * Hace visible el menú emergente.
+     *
+     * @param me evento del ratón
+     */
+    private void showPopupMenu(MouseEvent me) {    //despliega el menú emergente
     	if (me.isPopupTrigger() == true) {    //si el evento es el desencadenador del menú emergente
             //hace visible el menú emergente en las coordenadas actuales del ratón
             jPopupMenu.show(me.getComponent(), me.getX(), me.getY());
         }
     }
  
+    /**
+     * Actualiza el estado de las opciones "Deshacer" y "Rehacer".
+     */
     void updateControls() {    //actualiza algunos componentes de la GUI
     	//averigua si se pueden deshacer los cambios en el documento actual
         boolean canUndo = undoManager.canUndo();
@@ -518,42 +555,95 @@ public class TPEditor {    //clase publica TPEditor
         mpItemRedo.setEnabled(canRedo);
     }
  
+    /**
+     * Retorna la instancia de EventHandler, la clase interna que maneja eventos.
+     *
+     * @return el manejador de eventos.
+     */
     EventHandler getEventHandler() {    //retorna la instancia de EventHandler (la clase interna que maneja eventos)
         return eventHandler;
     }
      
+    /**
+     * Retorna la instancia de UndoManager, la cual administra las ediciones sobre
+     * el documento en el área de texto.
+     *
+     * @return el administrador de edición.
+     */
     UndoManager getUndoManager() {    //retorna la instancia de UndoManager (administrador de edición)
         return undoManager;
     }
      
+    /**
+     * Retorna el estado del documento actual.
+     *
+     * @return true si ah sido modificado, false en caso contrario
+     */
     boolean documentHasChanged() {    //retorna el estado del documento actual
         return hasChanged;
     }
      
+    /**
+     * Establece el estado del documento actual.
+     *
+     * @param hasChanged true si ah sido modificado, false en caso contrario
+     */
     void setDocumentChanged(boolean hasChanged) {    //establece el estado del documento actual
         this.hasChanged = hasChanged;
     }
      
+    /**
+     * Retorna la instancia de JTextArea, el área de edición.
+     *
+     * @return retorna el área de edición.
+     */
     JTextArea getJTextArea() {    //retorna la instancia de JTextArea (área de edición)
         return jTextArea;
     }
      
+    /**
+     * Retorna la instancia de JFrame, la ventana principal del editor.
+     *
+     * @return la ventana principal del editor.
+     */
     JFrame getJFrame() {    //retorna la instancia de JFrame (ventana principal del editor)
         return jFrame;
     }
      
+    /**
+     * Retorna la instancia de File, el archivo actual.
+     *
+     * @return el archivo actual
+     */
     File getCurrentFile() {    //retorna la instancia de File (el archivo actual)
         return currentFile;
     }
      
+    /**
+     * Establece el archivo actual.
+     *
+     * @param currentFile el archivo actual
+     */
     void setCurrentFile(File currentFile) {    //establece el archivo actual
         this.currentFile = currentFile;
     }
      
+    /**
+     * Retorna la instancia de la etiqueta sbFilePath, donde se muestra la ubicación
+     * del archivo actual.
+     *
+     * @return la instancia de la etiqueta sbFilePath
+     */
     JLabel getJLabelFilePath() {    //retorna la instancia de la etiqueta sbFilePath
         return sbFilePath;
     }
      
+    /**
+     * Retorna la instancia de la etiqueta sbFileSize, donde se muestra el tamaño
+     * del archivo actual
+     *
+     * @return la instancia de la etiqueta sbFileSize
+     */
     JLabel getJLabelFileSize() {    //retorna la instancia de la etiqueta sbFileSize
         return sbFileSize;
     }
@@ -564,6 +654,11 @@ public class TPEditor {    //clase publica TPEditor
                                                        CaretListener,
                                                        UndoableEditListener {
  
+    	/**
+         * Atiende y maneja los eventos de acción.
+         *
+         * @param ae evento de acción
+         */
         @Override
         public void actionPerformed(ActionEvent ae) {    //implemento de la interface ActionListener
         	String ac = ae.getActionCommand();    //se obtiene el nombre del comando ejecutado
@@ -629,6 +724,11 @@ public class TPEditor {    //clase publica TPEditor
             }
         }
  
+        /**
+         * Atiende y maneja los eventos del cursor.
+         *
+         * @param ce evento del cursor
+         */
         @Override
         public void caretUpdate(CaretEvent ce) {    //implemento de la interface CaretListener
         	final int caretPos;  //valor de la posición del cursor sin inicializar
@@ -656,6 +756,11 @@ public class TPEditor {    //clase publica TPEditor
             sbCaretPos.setText("Líneas: " + jTextArea.getLineCount() + " - Y: " + y + " - X: " + x);
         }
  
+        /**
+         * Atiende y maneja los eventos sobre el documento en el área de edición.
+         *
+         * @param uee evento de edición
+         */
         @Override
         public void undoableEditHappened(UndoableEditEvent uee) {    //implemento de la interface UndoableEditListener
         	/* el cambio realizado en el área de edición se guarda en el buffer
@@ -666,11 +771,21 @@ public class TPEditor {    //clase publica TPEditor
          hasChanged = true;    //marca el documento como modificado
         }
  
+        /**
+         * Atiende y maneja los eventos sobre el ratón cuando este es presionado.
+         *
+         * @param me evento del ratón
+         */
         @Override
         public void mousePressed(MouseEvent me) {    //herencia de la clase MouseAdapter
         	showPopupMenu(me);
         }
  
+        /**
+         * Atiende y maneja los eventos sobre el ratón cuando este es liberado.
+         *
+         * @param me evento del ratón
+         */
         @Override
         public void mouseReleased(MouseEvent me) {    //herencia de la clase MouseAdapter
         	showPopupMenu(me);

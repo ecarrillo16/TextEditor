@@ -18,8 +18,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
+ * Clase que ejecuta las operaciones solicitadas.
+ * 
  * @author ecarrillo
- *
  */
 
 public class ActionPerformer {    //clase publica ActionPerformer
@@ -27,10 +28,20 @@ public class ActionPerformer {    //clase publica ActionPerformer
     private final TPEditor tpEditor;    //instancia de TPEditor (la clase principal)
     private String lastSearch = "";     //la última búsqueda de texto realizada, por defecto no contiene nada
  
+    /**
+     * Constructor de la clase.
+     * 
+     * @param tpEditor clase principal
+     */
     public ActionPerformer(TPEditor tpEditor) {    //constructor de la clase ActionPerformer
     	this.tpEditor = tpEditor;    //guarda la instancia de la clase TPEditor
     }
  
+    /**
+     * Opción seleccionada: "Nuevo".
+     * 
+     * Reemplaza el documento actual por uno nuevo vacío.
+     */
     public void actionNew() {    //opción seleccionada: "Nuevo"
     	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
             //se le ofrece al usuario guardar los cambios
@@ -38,7 +49,7 @@ public class ActionPerformer {    //clase publica ActionPerformer
      
             switch (option) {
                 case JOptionPane.YES_OPTION:       //si elige que si
-                    actionSaveFile();              //se guarda el archivo
+                    actionSave();              //se guarda el archivo
                     break;
                 case JOptionPane.CANCEL_OPTION:    //si elige cancelar
                     return;                        //se cancela esta operación
@@ -63,6 +74,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         tpEditor.setDocumentChanged(false);
     }
  
+    /**
+     * Opción seleccionada: "Abrir".
+     * 
+     * Le permite al usuario elegir un archivo para cargar en el área de edición.
+     */
     public void actionOpen() {    //opción seleccionada: "Abrir"
     	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
             //le ofrece al usuario guardar los cambios
@@ -70,7 +86,7 @@ public class ActionPerformer {    //clase publica ActionPerformer
      
             switch (option) {
                 case JOptionPane.YES_OPTION:     //si elige que si
-                    actionSaveFile();            //se guarda el archivo
+                    actionSave();            //se guarda el archivo
                     break;
                 case JOptionPane.CANCEL_OPTION:  //si elige cancelar
                     return;                      //se cancela esta operación
@@ -120,6 +136,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Guardar".
+     * 
+     * Guarda el documento actual en el archivo asociado actualmente.
+     */
     public void actionSave() {    //opción seleccionada: "Guardar"
     	if (tpEditor.getCurrentFile() == null) {    //si no hay un archivo asociado al documento actual
             actionSaveAs();    //invoca el método actionSaveAs()
@@ -143,6 +164,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Guardar como".
+     * 
+     * Le permite al usuario elegir la ubicación donde se guardará el documento actual.
+     */
     public void actionSaveAs() {    //opción seleccionada: "Guardar como"
     	JFileChooser fc = getJFileChooser();    //se obtiene un JFileChooser
     	 
@@ -180,6 +206,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Imprimir".
+     * 
+     * Imprime el documento actual.
+     */
     public void actionPrint() {    //opción seleccionada: "Imprimir"
     	boolean result = false;    //resultado de la impresión, por defecto es false
     	 
@@ -190,6 +221,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Salir".
+     * 
+     * Finaliza el programa.
+     */
     public void actionExit() {    //opción seleccionada: "Salir"
     	if (tpEditor.documentHasChanged() == true) {    //si el documento esta marcado como modificado
             //se le ofrece al usuario guardar los cambios
@@ -208,6 +244,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         System.exit(0);    //se finaliza el programa con el código 0 (sin error)
     }
  
+    /**
+     * Opción seleccionada: "Deshacer".
+     * 
+     * Deshace el último cambio realizado en el documento actual.
+     */
     public void actionUndo() {    //opción seleccionada: "Deshacer"
     	try {
             //deshace el último cambio realizado sobre el documento en el área de edición
@@ -220,6 +261,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         tpEditor.updateControls();
     }
  
+    /**
+     * Opción seleccionada: "Rehacer".
+     * 
+     * Rehace el último cambio realizado en el documento actual.
+     */
     public void actionRedo() {    //opción seleccionada: "Rehacer"
     	try {
             //rehace el último cambio realizado sobre el documento en el área de edición
@@ -232,6 +278,12 @@ public class ActionPerformer {    //clase publica ActionPerformer
         tpEditor.updateControls();
     }
  
+    /**
+     * Opción seleccionada: "Buscar".
+     * 
+     * Busca un texto especificado por el usuario en el documento actual. El texto queda 
+     * guardado para búsquedas siguientes.
+     */
     public void actionSearch() {    //opción seleccionada: "Buscar"
     	//solicita al usuario que introduzca el texto a buscar
         String text = JOptionPane.showInputDialog(
@@ -254,6 +306,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Buscar siguiente".
+     * 
+     * Busca el texto de la última búsqueda en el documento actual.
+     */
     public void actionSearchNext() {    //opción seleccionada: "Buscar siguiente"
     	if (lastSearch.isEmpty() == false) {    //si la última búsqueda contiene texto
             String textAreaContent = tpEditor.getJTextArea().getText();    //se obtiene todo el contenido del área de edición
@@ -270,6 +327,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Ir a la línea...".
+     * 
+     * Posiciona el cursor en el inicio de una línea especificada por el usuario.
+     */
     public void actionGoToLine() {    //opción seleccionada: "Ir a la línea..."
     	//solicita al usuario que introduzca el número de línea
         String line = JOptionPane.showInputDialog(
@@ -295,17 +357,26 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Fuente de letra".
+     * 
+     * Le permite al usuario elegir la fuente para la letra en el área de edición.
+     */
     public void actionSelectFont() {   //opción seleccionada: "Fuente de letra"
     	//presenta el dialogo de selección de fuentes
         Font font = JFontChooser.showDialog(tpEditor.getJFrame(),
                                             "TextPad Demo - Fuente de letra:",
-                                            null);
+                                            tpEditor.getJTextArea().getFont());
         if (font != null) {    //si un fuente fue seleccionado
             //se establece como fuente del área de edición
             tpEditor.getJTextArea().setFont(font);
         }
     }
- 
+    /**
+     * Opción seleccionada: "Color de letra".
+     * 
+     * Le permite al usuario elegir el color para la letra en el área de edición.
+     */
     public void actionSelectFontColor() {    //opción seleccionada: "Color de letra"
     	//presenta el dialogo de selección de colores
         Color color = JColorChooser.showDialog(tpEditor.getJFrame(),
@@ -318,6 +389,11 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Opción seleccionada: "Color de fondo".
+     * 
+     * Le permite al usuario elegir el color para el fondo del área de edición.
+     */
     public void actionSelectBackgroundColor() {    //opción seleccionada: "Color de fondo"
     	//presenta el dialogo de selección de colores
         Color color = JColorChooser.showDialog(tpEditor.getJFrame(),
@@ -329,6 +405,12 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     }
  
+    /**
+     * Retorna la instancia de un JFileChooser, con el cual se muestra un dialogo que permite
+     * seleccionar un archivo.
+     * 
+     * @return un dialogo para seleccionar un archivo.
+     */
     private static JFileChooser getJFileChooser() {    //retorna un JFileChooser
     	JFileChooser fc = new JFileChooser();                     //construye un JFileChooser
         fc.setDialogTitle("TextPad Demo - Elige un archivo:");    //se le establece un título
@@ -337,7 +419,10 @@ public class ActionPerformer {    //clase publica ActionPerformer
         return fc;    //retorna el JFileChooser
     }
  
-    //clase anónima interna que define un filtro de extensiones
+    /**
+     * Clase anónima interna que extiende la clase javax.swing.filechooser.FileFilter para 
+     * establecer un filtro de archivos en el JFileChooser.
+     */
     private static FileFilter textFileFilter = new FileFilter() {
     	public boolean accept(File f) {
             //acepta directorios y archivos de extensión .txt
@@ -350,7 +435,13 @@ public class ActionPerformer {    //clase publica ActionPerformer
         }
     };
  
-    private static String shortPathName(String longpath) {    //comprime una ruta de archivo muy larga
+    /**
+     * Retorna la ruta de la ubicación de un archivo en forma reducida.
+     * 
+     * @param longpath la ruta de un archivo
+     * @return la ruta reducida del archivo
+     */
+    private static String shortPathName(String longPath) {    //comprime una ruta de archivo muy larga
     	//construye un arreglo de cadenas, donde cada una es un nombre de directorio
         String[] tokens = longPath.split(Pattern.quote(File.separator));
      
@@ -374,6 +465,12 @@ public class ActionPerformer {    //clase publica ActionPerformer
         return shortpath.toString();    //retorna la cadena resultante
     }
  
+    /**
+     * Redondea la longitud de un archivo en KiloBytes si es necesario.
+     * 
+     * @param length longitud de un archivo
+     * @return el tamaño redondeado  
+     */
     private static String roundFileSize(long length) {    //retorna el tamaño de un archivo redondeado
     	//retorna el tamaño del archivo redondeado
         return (length < 1024) ? length + " bytes" : (length / 1024) + " Kbytes";
