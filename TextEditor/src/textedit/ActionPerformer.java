@@ -366,7 +366,7 @@ public class ActionPerformer {    //clase publica ActionPerformer
     	//presenta el dialogo de selección de fuentes
         Font font = JFontChooser.showDialog(tpEditor.getJFrame(),
                                             "TextPad Demo - Fuente de letra:",
-                                            null);
+                                            tpEditor.getJTextArea().getFont());
         if (font != null) {    //si un fuente fue seleccionado
             //se establece como fuente del área de edición
             tpEditor.getJTextArea().setFont(font);
